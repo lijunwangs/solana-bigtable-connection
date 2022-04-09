@@ -1,6 +1,6 @@
 # solana-bigtable-connection
 A generic Rust based Bigtable connection library implemented using gRPC. This is refactored
-out the solana mono-repo so that can be shared for different applications.
+out the solana mono repo so that can be shared for different applications.
 
 ## BigTable Setup
 
