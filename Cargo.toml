@@ -1,0 +1,51 @@
+[package]
+authors = ["Solana Maintainers <maintainers@solana.foundation>"]
+edition = "2021"
+name = "solana-bigtable-connection"
+description = "The Solana AccountsDb plugin for Bigtable database."
+version = "1.10.3"
+repository = "https://github.com/solana-labs/solana-bigtable-connection"
+license = "Apache-2.0"
+homepage = "https://solana.com/"
+documentation = "https://docs.rs/solana-bigtable-connection"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+backoff = { version = "0.4.0", features = ["tokio"] }
+bincode = "1.3.3"
+bzip2 = "0.4.3"
+bs58 = "0.4.0"
+bytemuck = "1.7.2"
+chrono = { version = "0.4.11", features = ["serde"] }
+crossbeam-channel = "0.5"
+enum-iterator = "0.7.0"
+flate2 = "1.0.22"
+goauth = "0.11.1"
+log = "0.4.14"
+openssl = { version = "0.10" }
+prost = "0.9.0"
+prost-types = "0.9.0"
+serde = { version = "1.0.136", features = ["derive"] }
+serde_derive = "1.0.136"
+serde_json = "1.0.74"
+smpl_jwt = "0.6.1"
+thiserror = "1.0.30"
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.6", features = ["codec", "compat"] }
+tonic = { version = "0.6.2", features = ["tls", "transport"] }
+zstd = "0.11.1"
+
+[dev-dependencies]
+libc = "0.2.112"
+rand = "0.8.4"
+
+serial_test = "0.5.1"
+tempfile = "3.2.0"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[build-dependencies]
+tonic-build = "0.6.2"
