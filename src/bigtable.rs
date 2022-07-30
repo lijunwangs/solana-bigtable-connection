@@ -8,10 +8,13 @@ use {
     },
     backoff::{future::retry, ExponentialBackoff},
     log::*,
-    std::time::{Duration, Instant},
+    std::{
+        str::FromStr,
+        time::{Duration, Instant},
+    },
     thiserror::Error,
     tonic::{
-        codegen::InterceptedService, metadata::MetadataValue, transport::ClientTlsConfig, Request,
+        codegen::InterceptedService, transport::ClientTlsConfig, Request,
         Status,
     },
 };
@@ -223,7 +226,7 @@ impl BigTableConnection {
             self.channel.clone(),
             move |mut req: Request<()>| {
                 if let Some(access_token) = &access_token {
-                    match MetadataValue::from_str(&access_token.get()) {
+                    match FromStr::from_str(&access_token.get()) {
                         Ok(authorization_header) => {
                             req.metadata_mut()
                                 .insert("authorization", authorization_header);
