@@ -287,6 +287,29 @@ impl BigTableConnection {
         .await
     }
 
+    pub async fn get_protobuf_row_range_with_retry<T>(
+        &self,
+        table: &str,
+        start_at: &Option<RowKey>,
+        end_at: &Option<RowKey>,
+        rows_limit: i64,
+    ) -> Result<Vec<(RowKey, T)>>
+    where
+        T: prost::Message + Default,
+    {
+        retry(ExponentialBackoff::default(), || async move {
+            let mut client = self.client();
+            let rows = client.get_row_data(table, start_at.clone(), end_at.clone(), rows_limit).await?;
+            let mut result = Vec::with_capacity(rows.len());
+            for row in rows.into_iter() {
+                let decoded = deserialize_protobuf_cell_data(row.1.as_slice(), table, &row.0)?;
+                result.push((row.0, decoded));
+            }
+            Ok(result)
+        })
+        .await
+    }
+
     pub async fn put_protobuf_cells_with_retry<T>(
         &self,
         table: &str,
@@ -821,7 +844,7 @@ where
     B: serde::de::DeserializeOwned,
     P: prost::Message + Default,
 {
-    match deserialize_protobuf_cell_data(row_data, table, key.to_string()) {
+    match deserialize_protobuf_cell_data(row_data, table, &key) {
         Ok(result) => return Ok(CellData::Protobuf(result)),
         Err(err) => match err {
             Error::ObjectNotFound(_) => {}
@@ -834,7 +857,7 @@ where
 pub(crate) fn deserialize_protobuf_cell_data<T>(
     row_data: RowDataSlice,
     table: &str,
-    key: RowKey,
+    key: &RowKey,
 ) -> Result<T>
 where
     T: prost::Message + Default,
