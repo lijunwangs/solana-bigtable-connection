@@ -299,11 +299,14 @@ impl BigTableConnection {
     {
         retry(ExponentialBackoff::default(), || async move {
             let mut client = self.client();
-            let rows = client.get_row_data(table, start_at.clone(), end_at.clone(), rows_limit).await?;
+            let rows = client
+                .get_row_data(table, start_at.clone(), end_at.clone(), rows_limit)
+                .await?;
             let mut result = Vec::with_capacity(rows.len());
-            for row in rows.into_iter() {
-                let decoded = deserialize_protobuf_cell_data(row.1.as_slice(), table, &row.0)?;
-                result.push((row.0, decoded));
+            for (key, val) in rows.into_iter() {
+                let decoded = deserialize_protobuf_cell_data(val.as_slice(), table, &key)
+                    .map_err(backoff::Error::Permanent)?;
+                result.push((key, decoded));
             }
             Ok(result)
         })
